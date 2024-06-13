@@ -1,16 +1,49 @@
 ---
+import { db, User, Category, Todo, eq } from 'astro:db'
+interface User {
+  id: number
+  userName: string
+  email: string
+}
+interface Category {
+  id: number
+  label: string
+}
+const usuario: User[] = await db.select().from(User)
+const categories: Category[] = await db.select().from(Category)
 
+const todosByUser = await db
+  .select()
+  .from(Todo)
+  .innerJoin(User, eq(Todo.user_id, User.id))
+  .innerJoin(Category, eq(Todo.category_id, Category.id))
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+<html lang='en'>
+  <head>
+    <meta charset='utf-8' />
+    <link rel='icon' type='image/svg+xml' href='/favicon.svg' />
+    <meta name='viewport' content='width=device-width' />
+    <meta name='generator' content={Astro.generator} />
+    <title>Astro</title>
+  </head>
+  <body>
+    <h1>Listado de usuarios:</h1>
+    <ul>
+      {usuario.map((user) => <li>{user.userName}</li>)}
+    </ul>
+    <h2>Listado de categorias:</h2>
+    <ul>
+      {categories.map((category) => <li>{category.label}</li>)}
+    </ul>
+
+    <h2>Todos</h2>
+    <ul>
+      {
+        todosByUser.map((todo) => (
+          <li>{`Titulo: ${todo.Todo.title} - Categoría: ${todo.Category.label} por ${todo.User.userName} `}</li>
+        ))
+      }
+    </ul>
+  </body>
 </html>
